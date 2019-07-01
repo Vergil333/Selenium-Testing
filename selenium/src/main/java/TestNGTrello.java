@@ -1,4 +1,6 @@
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -12,6 +14,8 @@ import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import dtos.BoardDto;
 
 public class TestNGTrello {
 
@@ -39,28 +43,70 @@ public class TestNGTrello {
     }
 
     @Test(priority = 0)
-    private void createBoard() {
+    private void createBoard() throws IOException {
+        HashMap<Integer, String> expected = new HashMap<Integer, String>();
+        expected.put(200, "OK");
 
+        managers.ApiTrello.deleteAllObjects("board").forEach(object -> Assert.assertEquals(object, expected));
+
+        BoardDto newBoard;
+        newBoard = managers.ApiTrello.createBoard("Board - Test 1");
+        Assert.assertNotNull(newBoard, "Board was not created.");
     }
 
     @Test(priority = 1)
-    private void createBoardAndList() {
-        // Make sure we are on board menu
-        WebElement boardHref = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@href='/martinmachava3/boards']")));
-        if (!boardHref.getAttribute("class").equals("_3C9rwrEaxzhr8w _1gsiCYfUL0OjDP")) {  // if not highlighted
-            boardHref.click();
-        }
+    private void createBoardAndList() throws IOException {
+        BoardDto newBoard;
+        String boardName = "Board w/ List- Test 2";
+        String expectedName = boardName;
+        String listName = "Demo List";
 
-        String boardHrefClass = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@href='/martinmachava3/boards']"))).getAttribute("class");
+        newBoard = managers.ApiTrello.createBoard(boardName);
+        Assert.assertNotNull(newBoard, "Board was not created.");
+        Assert.assertEquals(newBoard.getName(), expectedName, "Expected name of the board does not match.");
 
-        Assert.assertEquals(boardHrefClass, "_3C9rwrEaxzhr8w _1gsiCYfUL0OjDP");
+        login();
+
+        openBoard(boardName);
+
+        archiveAllLists();
+
+        createDemoList(listName);
+    }
+
+    @Test(priority = 2)
+    private void createBoardAndListAndCard() throws IOException {
+        String boardName = "Board w/ List and Card- Test 3";
+        String expectedName = boardName;
+        String listName = "Demo List";
+        String cardName = "Demo Card";
+
+        // Create new board
+        BoardDto newBoard;
+        newBoard = managers.ApiTrello.createBoard(boardName);
+        Assert.assertNotNull(newBoard, "Board was not created.");
+        Assert.assertEquals(newBoard.getName(), expectedName, "Expected name of the board does not match.");
+
+        // Remove(archive) Lists inside just created board
+
+
+        login();
+
+        openBoard(boardName);
+
+        //archiveAllLists();
+        //createDemoList(listName);
+
+        createDemoCard(listName, cardName);
+
+        //fillDemoCard();
     }
 
     @Test(priority = 3)
     public void startMainTest() {
         login();
 
-        openBoard();
+        openBoard("Board - Test 4");
 
         archiveAllLists();
 
@@ -78,22 +124,25 @@ public class TestNGTrello {
         driver.findElement(By.id("login")).submit();
     }
 
-    private void createDemoBoard() {
-
-    }
-
-    private void openBoard() {
+    private void openBoard(String boardName) {
         // Make sure we are on board menu
         WebElement boardHref = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@href='/martinmachava3/boards']")));
         if (!boardHref.getAttribute("class").equals("_3C9rwrEaxzhr8w _1gsiCYfUL0OjDP")) {  // if not highlighted
             boardHref.click();
         }
 
+        String boardHrefClass = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@href='/martinmachava3/boards']"))).getAttribute("class");
+
+        Assert.assertEquals(boardHrefClass, "_3C9rwrEaxzhr8w _1gsiCYfUL0OjDP");
+
         // Open Demo Board
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='board-tile-details-name']//div[text()='Demo Board']"))).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='board-tile-details-name']//div[text()='" + boardName + "']"))).click();
+
+        // Close Menu
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class=\"board-menu-header-content\"]/a[@class=\"board-menu-header-close-button icon-lg icon-close js-hide-sidebar\"]"))).click();
 
         // Wait for Demo Board to load
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='board-wrapper']")));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id=\"content\"]/div[@class='board-wrapper']")));
     }
 
     private void archiveAllLists() {
@@ -113,34 +162,30 @@ public class TestNGTrello {
     }
 
     private void createDemoListAndCard() {
-        createDemoList();
-        createDemoCard();
+        createDemoList("Demo List");
+        createDemoCard("Demo List", "Demo Card");
     }
 
-    private void createDemoList() {
+    private void createDemoList(String name) {
         driver.findElement(By.xpath("//a[@class='open-add-list js-open-add-list']//span[@class='placeholder']"))
                 .click();
 
         driver.findElement(By.xpath("//input[@class='list-name-input']"))
-                .sendKeys("Demo List");
+                .sendKeys(name);
 
         driver.findElement(By.xpath("//input[@class='primary mod-list-add-button js-save-edit']"))
                 .click();
     }
 
-    private void createDemoCard() {
-        driver.findElement(By.xpath("//a[@class='open-card-composer js-open-card-composer']"))
+    private void createDemoCard(String listName, String cardName) {
+        driver.findElement(By.xpath("//div[@id=\"board\"]/div[@class=\"js-list list-wrapper\"]/div[@class=\"list js-list-content\"]/div[@class=\"list-header js-list-header u-clearfix is-menu-shown\"]/textarea[text()=\"Demo List\"]/../..//a[@class='open-card-composer js-open-card-composer']"))
                 .click();
 
-        driver.findElement(By.xpath("//textarea[@class='list-card-composer-textarea js-card-title']"))
-                .sendKeys("Demo Card");
+        driver.findElement(By.xpath("//div[@id=\"board\"]/div[@class=\"js-list list-wrapper\"]/div[@class=\"list js-list-content\"]/div[@class=\"list-header js-list-header u-clearfix is-menu-shown\"]/textarea[text()=\"Demo List\"]/../../div[@class=\"list-cards u-fancy-scrollbar u-clearfix js-list-cards js-sortable ui-sortable\"]/div[@class=\"card-composer\"]/div[@class=\"list-card js-composer\"]/div[@class=\"list-card-details u-clearfix\"]/textarea"))
+                .sendKeys(cardName);
 
-        driver.findElement(By.xpath("//input[@class='primary confirm mod-compact js-add-card']"))
+        driver.findElement(By.xpath("//div[@id=\"board\"]/div[@class=\"js-list list-wrapper\"]/div[@class=\"list js-list-content\"]/div[@class=\"list-header js-list-header u-clearfix is-menu-shown\"]/textarea[text()=\"Demo List\"]/../../div[@class=\"list-cards u-fancy-scrollbar u-clearfix js-list-cards js-sortable ui-sortable\"]/div[@class=\"card-composer\"]/div[@class=\"cc-controls u-clearfix\"]/div[@class=\"cc-controls-section\"]/input[@value=\"Add Card\"]"))
                 .click();
-    }
-
-    private void removeAllBoards() {
-        // this will be done via REST API
     }
 
     @AfterTest
