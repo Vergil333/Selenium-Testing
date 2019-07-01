@@ -12,19 +12,26 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dtos.BoardDto;
+import dtos.ListDto;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 
-public class apiTrello {
+public class ApiTrello {
 
-    private String baseUrl = "https://api.trello.com/1/";
-    private String deleteObjectUrl = baseUrl + "{object}/{id}";
-    private String createBoardUrl = baseUrl + "{object}/";
+    private static String baseUrl = "https://api.trello.com/1/";
+    private static String deleteObjectUrl = baseUrl + "{object}/{id}";
+    private static String createObjectUrl = baseUrl + "{object}/";
+    private static String boardListsUrl = baseUrl + "boards/{id}/lists";
 
     @Test
     public void testMethodGetBoards() throws IOException {
         Assert.assertNotNull(getAllBoards());
+    }
+
+    @Test
+    public void testMethodGetLists() throws IOException {
+        Assert.assertNotNull(getAllLists("5d1a0503514ba53010835383"));
     }
 
     @Test
@@ -37,10 +44,10 @@ public class apiTrello {
 
     @Test
     public void testCreateBoards() throws IOException {
-        Assert.assertNotNull(createBoard("boards", "demo board"));
+        Assert.assertNotNull(createBoard("demo board"));
     }
 
-    public List<BoardDto> getAllBoards() throws IOException {
+    public static List<BoardDto> getAllBoards() throws IOException {
         Unirest.config().enableCookieManagement(false);
 
         HttpResponse<String> response = null;
@@ -58,19 +65,42 @@ public class apiTrello {
         assert response != null;
         List<BoardDto> boards = mapper.readValue(response.getBody(), new TypeReference<List<BoardDto>>() {});
 
-        //System.out.println("response: " + response);
         System.out.println("response.getBody(): " + response.getBody());
         boards.forEach((board) -> System.out.println("Board Name: " + board.getName()));
 
         return boards;
     }
 
-    private BoardDto createBoard(String object, String name) throws IOException {
+    private static List<ListDto> getAllLists(String boardId) throws IOException {
         HttpResponse<String> response = null;
 
         try {
-            response = Unirest.post(createBoardUrl)
-                    .routeParam("object", object)
+            response = Unirest.get(boardListsUrl)
+                    .routeParam("id", boardId)
+                    .queryString("key", "77c295ce5af4dcf6e1878306ace9d3ca")
+                    .queryString("token", "1a1cfab1a058439ea474fd2de6d58cc3c37536dbdbb7e3a83bc6ce91bd799c7d")
+                    .queryString("filter", "open")
+                    .asString();
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        assert response != null;
+        List<ListDto> lists = mapper.readValue(response.getBody(), new TypeReference<List<ListDto>>() {});
+
+        System.out.println("response.getBody(): " + response.getBody());
+        lists.forEach((list) -> System.out.println("Board Name: " + list.getName()));
+
+        return lists;
+    }
+
+    public static BoardDto createBoard(String name) throws IOException {
+        HttpResponse<String> response = null;
+
+        try {
+            response = Unirest.post(createObjectUrl)
+                    .routeParam("object", "boards")
                     .queryString("name", name)
                     .queryString("key", "77c295ce5af4dcf6e1878306ace9d3ca")
                     .queryString("token", "1a1cfab1a058439ea474fd2de6d58cc3c37536dbdbb7e3a83bc6ce91bd799c7d")
@@ -87,7 +117,7 @@ public class apiTrello {
         return newBoard;
     }
 
-    public List<HashMap<Integer, String>> deleteAllObjects(String object) throws IOException {
+    public static List<HashMap<Integer, String>> deleteAllObjects(String object) throws IOException {
         Unirest.config().enableCookieManagement(false);
 
         List<String> boardIds = getAllBoards().stream().map(BoardDto::getId).collect(Collectors.toList());
@@ -95,7 +125,7 @@ public class apiTrello {
         return boardIds.stream().map(id -> deleteObject(object, id)).collect(Collectors.toList());
     }
 
-    private HashMap<Integer, String> deleteObject(String object, String id) {
+    private static HashMap<Integer, String> deleteObject(String object, String id) {
         int responseCode = 0;
         String responseText = null;
 
