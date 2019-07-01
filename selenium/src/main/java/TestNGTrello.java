@@ -47,7 +47,7 @@ public class TestNGTrello {
         HashMap<Integer, String> expected = new HashMap<Integer, String>();
         expected.put(200, "OK");
 
-        managers.ApiTrello.deleteAllObjects("board").forEach(object -> Assert.assertEquals(object, expected));
+        managers.ApiTrello.deleteAllBoards("board").forEach(object -> Assert.assertEquals(object, expected));
 
         BoardDto newBoard;
         newBoard = managers.ApiTrello.createBoard("Board - Test 1");
@@ -65,11 +65,17 @@ public class TestNGTrello {
         Assert.assertNotNull(newBoard, "Board was not created.");
         Assert.assertEquals(newBoard.getName(), expectedName, "Expected name of the board does not match.");
 
+        HashMap<Integer, String> expected = new HashMap<Integer, String>();
+        expected.put(200, "OK");
+
+        // Remove lists in newly created Board
+        managers.ApiTrello.archiveAllLists("lists", newBoard.getId()).forEach(object -> Assert.assertEquals(object, expected));
+
         login();
 
         openBoard(boardName);
 
-        archiveAllLists();
+        //archiveAllLists();
 
         createDemoList(listName);
     }

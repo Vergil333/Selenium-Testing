@@ -31,7 +31,7 @@ public class ApiTrello {
 
     @Test
     public void testMethodGetLists() throws IOException {
-        Assert.assertNotNull(getAllLists("5d1a0503514ba53010835383"));
+        Assert.assertNotNull(getAllLists("5d1a2c9da06d884e54aa3ddf"));
     }
 
     @Test
@@ -39,7 +39,15 @@ public class ApiTrello {
         HashMap<Integer, String> expected = new HashMap<Integer, String>();
         expected.put(200, "OK");
 
-        deleteAllObjects("board").forEach(object -> Assert.assertEquals(object, expected));
+        deleteAllBoards("board").forEach(object -> Assert.assertEquals(object, expected));
+    }
+
+    @Test
+    public void testMethodDeleteListsInBoard() throws IOException {
+        HashMap<Integer, String> expected = new HashMap<Integer, String>();
+        expected.put(200, "OK");
+
+        archiveAllLists("lists", "5d1a2c9da06d884e54aa3ddf").forEach(object -> Assert.assertEquals(object, expected));
     }
 
     @Test
@@ -117,12 +125,45 @@ public class ApiTrello {
         return newBoard;
     }
 
-    public static List<HashMap<Integer, String>> deleteAllObjects(String object) throws IOException {
+    public static List<HashMap<Integer, String>> deleteAllBoards(String object) throws IOException {
         Unirest.config().enableCookieManagement(false);
 
         List<String> boardIds = getAllBoards().stream().map(BoardDto::getId).collect(Collectors.toList());
 
         return boardIds.stream().map(id -> deleteObject(object, id)).collect(Collectors.toList());
+    }
+
+    public static List<HashMap<Integer, String>> archiveAllLists(String object, String boardId) throws IOException {
+        //Unirest.config().enableCookieManagement(false);
+
+        List<String> listIds = getAllLists(boardId).stream().map(ListDto::getId).collect(Collectors.toList());
+
+        return listIds.stream().map(id -> archiveList(object, id)).collect(Collectors.toList());
+    }
+
+    private static HashMap<Integer, String> archiveList(String object, String id) {
+        int responseCode = 0;
+        String responseText = null;
+
+        try {
+            HttpResponse<String> response = Unirest.put(deleteObjectUrl + "/closed")
+                    .routeParam("object", object)
+                    .routeParam("id", id)
+                    .queryString("value", "true")
+                    .queryString("key", "77c295ce5af4dcf6e1878306ace9d3ca")
+                    .queryString("token", "1a1cfab1a058439ea474fd2de6d58cc3c37536dbdbb7e3a83bc6ce91bd799c7d")
+                    .asString();
+
+            responseCode = response.getStatus();
+            responseText = response.getStatusText();
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
+
+        HashMap<Integer, String> responseMap = new HashMap<>();
+        responseMap.put(responseCode, responseText);
+
+        return responseMap;
     }
 
     private static HashMap<Integer, String> deleteObject(String object, String id) {
