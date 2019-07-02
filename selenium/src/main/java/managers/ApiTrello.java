@@ -157,8 +157,6 @@ public class ApiTrello {
     }
 
     public static List<HashMap<Integer, String>> archiveAllLists(String object, String boardId) throws IOException {
-        //Unirest.config().enableCookieManagement(false);
-
         List<String> listIds = getAllLists(boardId).stream().map(ListDto::getId).collect(Collectors.toList());
 
         return listIds.stream().map(id -> archiveList(object, id)).collect(Collectors.toList());

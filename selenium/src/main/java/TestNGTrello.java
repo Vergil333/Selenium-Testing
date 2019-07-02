@@ -32,30 +32,23 @@ public class TestNGTrello {
         wait = new WebDriverWait(driver, 7);
     }
 
-    private WebDriver prepareFirefoxDriver() {
-        File driverFile = new File("src/main/resources/geckodriver_linux");
-        String pathToGeckoDrive = driverFile.getAbsolutePath();
-        System.setProperty("webdriver.gecko.driver", pathToGeckoDrive);
-        return new FirefoxDriver();
-    }
-
-    private WebDriver prepareChromeDriver() {
-        File driverFile = new File("src/main/resources/chromedriver_linux");
-        String pathToChromeDrive = driverFile.getAbsolutePath();
-        System.setProperty("webdriver.chrome.driver", pathToChromeDrive);
-        return new ChromeDriver();
+    @AfterTest
+    private void closeBrowser() {
+        driver.close();
     }
 
     @Test(priority = 0)
-    private void createBoard() throws IOException {
+    private void createBoardWithSelenium() throws IOException {
+        String boardName = "Board - Test 1";
+
         HashMap<Integer, String> expected = new HashMap<Integer, String>();
         expected.put(200, "OK");
 
         managers.ApiTrello.deleteAllBoards("board").forEach(object -> Assert.assertEquals(object, expected));
 
-        BoardDto newBoard;
-        newBoard = managers.ApiTrello.createBoard("Board - Test 1");
-        Assert.assertNotNull(newBoard, "Board was not created.");
+        login();
+        checkBoardPage();
+        createBoard(boardName);
     }
 
     @Test(priority = 1)
@@ -75,16 +68,15 @@ public class TestNGTrello {
         managers.ApiTrello.archiveAllLists("lists", newBoard.getId()).forEach(object -> Assert.assertEquals(object, expected));
 
         login();
-
+        checkBoardPage();
         openBoard(boardName);
-
+        archiveAllLists();
         //archiveAllLists();
-
         createDemoList(listName);
     }
 
     @Test(priority = 2)
-    private void createBoardAndListAndCard() throws IOException {
+    private void createEverything() throws IOException {
         String boardName = "Board w/ List and Card- Test 3";
         String expectedBoardName = boardName;
         String listName = "Demo List";
@@ -110,26 +102,27 @@ public class TestNGTrello {
         Assert.assertEquals(newList.getName(), expectedListName, "Expected name of the list does not match.");
 
         login();
-
+        checkBoardPage();
         openBoard(boardName);
-
-        //archiveAllLists();
-        //createDemoList(listName);
-
+        closeBoardMenu();
         createDemoCard(listName, cardName);
-
         fillDemoCard(cardName);
     }
 
     @Test(priority = 3)
-    public void startMainTest() {
+    public void createEverythingWithSelenium() throws IOException {
+        String boardName = "Board Everything with Selenium - Test 4";
+        String listName = "Demo List";
+        String cardName = "Demo Card";
+
         login();
-
-        openBoard("Board - Test 4");
-
+        checkBoardPage();
+        createBoard(boardName); // board is opened automatically after creation
+        closeBoardMenu();
         archiveAllLists();
-
-        createDemoListAndCard();
+        createDemoList(listName);
+        createDemoCard(listName, cardName);
+        fillDemoCard(cardName);
     }
 
     private void login() {
@@ -143,7 +136,21 @@ public class TestNGTrello {
         driver.findElement(By.id("login")).submit();
     }
 
-    private void openBoard(String boardName) {
+    private WebDriver prepareFirefoxDriver() {
+        File driverFile = new File("src/main/resources/geckodriver_linux");
+        String pathToGeckoDrive = driverFile.getAbsolutePath();
+        System.setProperty("webdriver.gecko.driver", pathToGeckoDrive);
+        return new FirefoxDriver();
+    }
+
+    private WebDriver prepareChromeDriver() {
+        File driverFile = new File("src/main/resources/chromedriver_linux");
+        String pathToChromeDrive = driverFile.getAbsolutePath();
+        System.setProperty("webdriver.chrome.driver", pathToChromeDrive);
+        return new ChromeDriver();
+    }
+
+    private void checkBoardPage() {
         // Make sure we are on board menu
         WebElement boardHref = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@href='/martinmachava3/boards']")));
         if (!boardHref.getAttribute("class").equals("_3C9rwrEaxzhr8w _1gsiCYfUL0OjDP")) {  // if not highlighted
@@ -153,12 +160,25 @@ public class TestNGTrello {
         String boardHrefClass = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@href='/martinmachava3/boards']"))).getAttribute("class");
 
         Assert.assertEquals(boardHrefClass, "_3C9rwrEaxzhr8w _1gsiCYfUL0OjDP");
+    }
 
+    private void createBoard(String name) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul[@class=\"boards-page-board-section-list\"]/li/div/p/span[text()=\"Create new board\"]/../..")))
+                .click();
+        driver.findElement(By.xpath("//form[@class=\"create-board-form\"]/div[@class=\"form-container\"]/div[contains(@class,\"board-tile create-board-tile\")]/div/input[@class=\"subtle-input\"]"))
+                .sendKeys(name);
+        driver.findElement(By.xpath("//form[@class=\"create-board-form\"]/button[@class=\"primary\"]/span[text()=\"Create Board\"]"))
+                .click();
+    }
+
+    private void openBoard(String boardName) {
         // Open Demo Board
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='board-tile-details-name']//div[text()='" + boardName + "']"))).click();
+    }
 
+    private void closeBoardMenu() {
         // Close Menu
-        if (wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id=\"content\"]/div[@class=\"board-wrapper\"]")))
+        if (wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id=\"content\"]/div[contains(@class,\"board-wrapper\")]")))
                 .getAttribute("class")
                 .contains("is-show-menu")) {
             driver.findElement(By.xpath("//div[@class=\"board-menu-header-content\"]/a[@class=\"board-menu-header-close-button icon-lg icon-close js-hide-sidebar\"]")).click();
@@ -272,11 +292,8 @@ public class TestNGTrello {
         // Check comment checkbox
         driver.findElement(By.xpath("//div[contains(@class,\"checklist-list\")]/div[@class=\"checklist\"]/div[contains(@class,\"checklist-items-list\")]/div[@class=\"checklist-item\"]/div[contains(@class,\"checklist-item-details\")]/div[contains(@class,\"checklist-item-row\")]/span[text()=\"Add comment\"]/../../../div[@class=\"checklist-item-checkbox enabled js-toggle-checklist-item\"]"))
                 .click();
-    }
 
-    @AfterTest
-    private void closeBrowser() {
-        // removeAllBoards();
-        //driver.close();
+        // Wait till checkbox is checked
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(@class,\"checklist-list\")]/div[@class=\"checklist\"]/div[contains(@class,\"checklist-items-list\")]/div[@class=\"checklist-item checklist-item-state-complete\"]/div[contains(@class,\"checklist-item-details\")]/div[contains(@class,\"checklist-item-row\")]/span[text()=\"Add comment\"]/../../../div[@class=\"checklist-item-checkbox enabled js-toggle-checklist-item\"]")));
     }
 }
