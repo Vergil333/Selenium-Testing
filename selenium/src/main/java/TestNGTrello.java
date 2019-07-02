@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import dtos.BoardDto;
+import dtos.ListDto;
 
 public class TestNGTrello {
 
@@ -31,13 +33,15 @@ public class TestNGTrello {
     }
 
     private WebDriver prepareFirefoxDriver() {
-        String pathToGeckoDrive = "/home/vergil333/IdeaProjects/Selenium-Testing/selenium/geckodriver_linux"; // Change to match your path
+        File driverFile = new File("src/main/resources/geckodriver_linux");
+        String pathToGeckoDrive = driverFile.getAbsolutePath();
         System.setProperty("webdriver.gecko.driver", pathToGeckoDrive);
         return new FirefoxDriver();
     }
 
     private WebDriver prepareChromeDriver() {
-        String pathToChromeDrive = "/home/vergil333/IdeaProjects/Selenium-Testing/selenium/chromedriver_linux"; // Change to match your path
+        File driverFile = new File("src/main/resources/chromedriver_linux");
+        String pathToChromeDrive = driverFile.getAbsolutePath();
         System.setProperty("webdriver.chrome.driver", pathToChromeDrive);
         return new ChromeDriver();
     }
@@ -65,10 +69,9 @@ public class TestNGTrello {
         Assert.assertNotNull(newBoard, "Board was not created.");
         Assert.assertEquals(newBoard.getName(), expectedName, "Expected name of the board does not match.");
 
+        // Remove lists in newly created Board
         HashMap<Integer, String> expected = new HashMap<Integer, String>();
         expected.put(200, "OK");
-
-        // Remove lists in newly created Board
         managers.ApiTrello.archiveAllLists("lists", newBoard.getId()).forEach(object -> Assert.assertEquals(object, expected));
 
         login();
@@ -83,18 +86,28 @@ public class TestNGTrello {
     @Test(priority = 2)
     private void createBoardAndListAndCard() throws IOException {
         String boardName = "Board w/ List and Card- Test 3";
-        String expectedName = boardName;
+        String expectedBoardName = boardName;
         String listName = "Demo List";
+        String expectedListName = listName;
         String cardName = "Demo Card";
 
-        // Create new board
+        // Create new board via API
         BoardDto newBoard;
         newBoard = managers.ApiTrello.createBoard(boardName);
         Assert.assertNotNull(newBoard, "Board was not created.");
-        Assert.assertEquals(newBoard.getName(), expectedName, "Expected name of the board does not match.");
+        Assert.assertEquals(newBoard.getName(), expectedBoardName, "Expected name of the board does not match.");
 
-        // Remove(archive) Lists inside just created board
 
+        // Remove lists in newly created Board via API
+        HashMap<Integer, String> expected = new HashMap<Integer, String>();
+        expected.put(200, "OK");
+        managers.ApiTrello.archiveAllLists("lists", newBoard.getId()).forEach(object -> Assert.assertEquals(object, expected));
+
+        // Create new list via API
+        ListDto newList;
+        newList = managers.ApiTrello.createList(newBoard.getId(), listName);
+        Assert.assertNotNull(newList, "List was not created.");
+        Assert.assertEquals(newList.getName(), expectedListName, "Expected name of the list does not match.");
 
         login();
 
@@ -105,7 +118,7 @@ public class TestNGTrello {
 
         createDemoCard(listName, cardName);
 
-        //fillDemoCard();
+        fillDemoCard(cardName);
     }
 
     @Test(priority = 3)
@@ -145,7 +158,11 @@ public class TestNGTrello {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class='board-tile-details-name']//div[text()='" + boardName + "']"))).click();
 
         // Close Menu
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class=\"board-menu-header-content\"]/a[@class=\"board-menu-header-close-button icon-lg icon-close js-hide-sidebar\"]"))).click();
+        if (wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id=\"content\"]/div[@class=\"board-wrapper\"]")))
+                .getAttribute("class")
+                .contains("is-show-menu")) {
+            driver.findElement(By.xpath("//div[@class=\"board-menu-header-content\"]/a[@class=\"board-menu-header-close-button icon-lg icon-close js-hide-sidebar\"]")).click();
+        }
 
         // Wait for Demo Board to load
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id=\"content\"]/div[@class='board-wrapper']")));
@@ -173,30 +190,93 @@ public class TestNGTrello {
     }
 
     private void createDemoList(String name) {
-        driver.findElement(By.xpath("//a[@class='open-add-list js-open-add-list']//span[@class='placeholder']"))
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='open-add-list js-open-add-list']//span[@class='placeholder']")))
                 .click();
 
-        driver.findElement(By.xpath("//input[@class='list-name-input']"))
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='list-name-input']")))
                 .sendKeys(name);
 
-        driver.findElement(By.xpath("//input[@class='primary mod-list-add-button js-save-edit']"))
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@class='primary mod-list-add-button js-save-edit']")))
                 .click();
     }
 
     private void createDemoCard(String listName, String cardName) {
-        driver.findElement(By.xpath("//div[@id=\"board\"]/div[@class=\"js-list list-wrapper\"]/div[@class=\"list js-list-content\"]/div[@class=\"list-header js-list-header u-clearfix is-menu-shown\"]/textarea[text()=\"Demo List\"]/../..//a[@class='open-card-composer js-open-card-composer']"))
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id=\"board\"]/div[@class=\"js-list list-wrapper\"]/div[@class=\"list js-list-content\"]/div[contains(@class,\"list-header js-list-header\")]/textarea[text()=\"" + listName + "\"]/../../a[@class=\"open-card-composer js-open-card-composer\"]/span[@class=\"icon-sm icon-add\"]")))
                 .click();
 
-        driver.findElement(By.xpath("//div[@id=\"board\"]/div[@class=\"js-list list-wrapper\"]/div[@class=\"list js-list-content\"]/div[@class=\"list-header js-list-header u-clearfix is-menu-shown\"]/textarea[text()=\"Demo List\"]/../../div[@class=\"list-cards u-fancy-scrollbar u-clearfix js-list-cards js-sortable ui-sortable\"]/div[@class=\"card-composer\"]/div[@class=\"list-card js-composer\"]/div[@class=\"list-card-details u-clearfix\"]/textarea"))
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id=\"board\"]/div[@class=\"js-list list-wrapper\"]/div[@class=\"list js-list-content\"]/div[contains(@class,\"list-header js-list-header\")]/textarea[text()=\"" + listName + "\"]/../../div[@class=\"list-cards u-fancy-scrollbar u-clearfix js-list-cards js-sortable ui-sortable\"]/div[@class=\"card-composer\"]/div[@class=\"list-card js-composer\"]/div[@class=\"list-card-details u-clearfix\"]/textarea")))
                 .sendKeys(cardName);
 
-        driver.findElement(By.xpath("//div[@id=\"board\"]/div[@class=\"js-list list-wrapper\"]/div[@class=\"list js-list-content\"]/div[@class=\"list-header js-list-header u-clearfix is-menu-shown\"]/textarea[text()=\"Demo List\"]/../../div[@class=\"list-cards u-fancy-scrollbar u-clearfix js-list-cards js-sortable ui-sortable\"]/div[@class=\"card-composer\"]/div[@class=\"cc-controls u-clearfix\"]/div[@class=\"cc-controls-section\"]/input[@value=\"Add Card\"]"))
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id=\"board\"]/div[@class=\"js-list list-wrapper\"]/div[@class=\"list js-list-content\"]/div[contains(@class,\"list-header js-list-header\")]/textarea[text()=\"" + listName + "\"]/../../div[@class=\"list-cards u-fancy-scrollbar u-clearfix js-list-cards js-sortable ui-sortable\"]/div[@class=\"card-composer\"]/div[@class=\"cc-controls u-clearfix\"]/div[@class=\"cc-controls-section\"]/input[@value=\"Add Card\"]")))
+                .click();
+    }
+
+    private void fillDemoCard(String cardName) throws IOException {
+        File image = new File("src/main/resources/mot_black_logo.png");
+        String imagePath = image.getAbsolutePath();
+
+        // Open card
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id=\"board\"]/div[@class=\"js-list list-wrapper\"]/div[@class=\"list js-list-content\"]/div/a/div/span[@class=\"list-card-title js-card-name\"][text()=\"" + cardName + "\"]")))
+                .click();
+
+        // Add checklist
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class=\"window\"]/div/div/div[@class=\"window-sidebar\"]/div[contains(@class,\"window-module\")]/div/a[@class=\"button-link js-add-checklist-menu\"]")))
+                .click();
+        driver.findElement(By.xpath("//div[@class=\"pop-over is-shown\"]/div/div/div[contains(@class,\"pop-over-content js-pop-over-content\")]/div/div/form/input[@id=\"id-checklist\"]"))
+                .sendKeys("Selenium part of the task");
+        driver.findElement(By.xpath("//div[@class=\"pop-over is-shown\"]/div/div/div[contains(@class,\"pop-over-content js-pop-over-content\")]/div/div/form/input[@class=\"primary wide confirm js-add-checklist\"]"))
+                .click();
+        // Add checkbox - description
+        driver.findElement(By.xpath("//div[@class=\"editable checklist-new-item u-gutter js-new-checklist-item editing\"]/textarea[@class=\"edit field checklist-new-item-text js-new-checklist-item-input\"]"))
+                .sendKeys("Add description");
+        driver.findElement(By.xpath("//div[@class=\"editable checklist-new-item u-gutter js-new-checklist-item editing\"]/div[@class=\"checklist-add-controls u-clearfix\"]/input[@class=\"primary confirm mod-submit-edit js-add-checklist-item\"]"))
+                .click();
+        // Add checkbox - image
+        driver.findElement(By.xpath("//div[@class=\"editable checklist-new-item u-gutter js-new-checklist-item editing\"]/textarea[@class=\"edit field checklist-new-item-text js-new-checklist-item-input\"]"))
+                .sendKeys("Add image");
+        driver.findElement(By.xpath("//div[@class=\"editable checklist-new-item u-gutter js-new-checklist-item editing\"]/div[@class=\"checklist-add-controls u-clearfix\"]/input[@class=\"primary confirm mod-submit-edit js-add-checklist-item\"]"))
+                .click();
+        // Add checkbox - comment
+        driver.findElement(By.xpath("//div[@class=\"editable checklist-new-item u-gutter js-new-checklist-item editing\"]/textarea[@class=\"edit field checklist-new-item-text js-new-checklist-item-input\"]"))
+                .sendKeys("Add comment");
+        driver.findElement(By.xpath("//div[@class=\"editable checklist-new-item u-gutter js-new-checklist-item editing\"]/div[@class=\"checklist-add-controls u-clearfix\"]/input[@class=\"primary confirm mod-submit-edit js-add-checklist-item\"]"))
+                .click();
+
+        // Add description
+        driver.findElement(By.xpath("//a[@class=\"description-fake-text-area hide-on-edit js-edit-desc js-hide-with-draft\"][text()=\"Add a more detailed description…\"]"))
+                .click();
+        driver.findElement(By.xpath("//div[@class=\"description-content js-desc-content\"]/div[@class=\"description-edit edit\"]/textarea[@class=\"field field-autosave js-description-draft description card-description\"]"))
+                .sendKeys("Takže vyplnené description by sme mali...");
+        driver.findElement(By.xpath("//div[@class=\"description-content js-desc-content\"]/div[@class=\"description-edit edit\"]/div[@class=\"edit-controls u-clearfix\"]/input[@class=\"primary confirm mod-submit-edit js-save-edit\"]"))
+                .click();
+        // Check description checkbox
+        driver.findElement(By.xpath("//div[contains(@class,\"checklist-list\")]/div[@class=\"checklist\"]/div[contains(@class,\"checklist-items-list\")]/div[@class=\"checklist-item\"]/div[contains(@class,\"checklist-item-details\")]/div[contains(@class,\"checklist-item-row\")]/span[text()=\"Add description\"]/../../../div[@class=\"checklist-item-checkbox enabled js-toggle-checklist-item\"]"))
+                .click();
+
+        // Add image
+        driver.findElement(By.xpath("//form/div[@class=\"comment-frame\"]/div[@class=\"comment-box\"]/div[@class=\"comment-box-options\"]/a[@class=\"comment-box-options-item js-comment-add-attachment\"]/span[@class=\"icon-sm icon-attachment\"]"))
+                .click();
+        driver.findElement(By.xpath("//div[@class=\"pop-over is-shown\"]/div[@class=\"no-back\"]/div/div[@class=\"pop-over-content js-pop-over-content u-fancy-scrollbar js-tab-parent\"]/div/div/ul[@class=\"pop-over-list\"]/li[@class=\"uploader\"]/form[@class=\"realfile\"]/input[@class=\"js-attach-file\"]"))
+                .sendKeys(imagePath);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class=\"window-module add-comment-section\"]/div[@class=\"new-comment js-new-comment mod-card-back is-focused\"]/form/div[@class=\"comment-controls u-clearfix\"]/input[@class=\"primary confirm mod-no-top-bottom-margin js-add-comment\"]")))
+                .click();
+        // Check image checkbox
+        driver.findElement(By.xpath("//div[contains(@class,\"checklist-list\")]/div[@class=\"checklist\"]/div[contains(@class,\"checklist-items-list\")]/div[@class=\"checklist-item\"]/div[contains(@class,\"checklist-item-details\")]/div[contains(@class,\"checklist-item-row\")]/span[text()=\"Add image\"]/../../../div[@class=\"checklist-item-checkbox enabled js-toggle-checklist-item\"]"))
+                .click();
+
+        // Add comment
+        driver.findElement(By.xpath("//div[@class=\"window-module add-comment-section\"]/div[contains(@class,\"new-comment js-new-comment\")]/form/div[@class=\"comment-frame\"]/div[@class=\"comment-box\"]/textarea[@class=\"comment-box-input js-new-comment-input\"]"))
+                .sendKeys("Tak ta to by malo byť všetko...");
+        driver.findElement(By.xpath("//div[@class=\"window-module add-comment-section\"]/div[contains(@class,\"new-comment js-new-comment\")]/form/div[contains(@class,\"comment-controls\")]/input[@class=\"primary confirm mod-no-top-bottom-margin js-add-comment\"]"))
+                .click();
+        // Check comment checkbox
+        driver.findElement(By.xpath("//div[contains(@class,\"checklist-list\")]/div[@class=\"checklist\"]/div[contains(@class,\"checklist-items-list\")]/div[@class=\"checklist-item\"]/div[contains(@class,\"checklist-item-details\")]/div[contains(@class,\"checklist-item-row\")]/span[text()=\"Add comment\"]/../../../div[@class=\"checklist-item-checkbox enabled js-toggle-checklist-item\"]"))
                 .click();
     }
 
     @AfterTest
     private void closeBrowser() {
         // removeAllBoards();
-        driver.close();
+        //driver.close();
     }
 }

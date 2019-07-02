@@ -133,6 +133,29 @@ public class ApiTrello {
         return boardIds.stream().map(id -> deleteObject(object, id)).collect(Collectors.toList());
     }
 
+    public static ListDto createList(String boardId, String name) throws IOException {
+        HttpResponse<String> response = null;
+
+        try {
+            response = Unirest.post(createObjectUrl)
+                    .routeParam("object", "lists")
+                    .queryString("name", name)
+                    .queryString("idBoard", boardId)
+                    .queryString("key", "77c295ce5af4dcf6e1878306ace9d3ca")
+                    .queryString("token", "1a1cfab1a058439ea474fd2de6d58cc3c37536dbdbb7e3a83bc6ce91bd799c7d")
+                    .asString();
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        assert response != null;
+        ListDto newList = mapper.readValue(response.getBody(), new TypeReference<ListDto>() {});
+
+        System.out.println(newList);
+        return newList;
+    }
+
     public static List<HashMap<Integer, String>> archiveAllLists(String object, String boardId) throws IOException {
         //Unirest.config().enableCookieManagement(false);
 
