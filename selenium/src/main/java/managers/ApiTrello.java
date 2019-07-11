@@ -19,10 +19,10 @@ import kong.unirest.UnirestException;
 
 public class ApiTrello {
 
-    private static String baseUrl = "https://api.trello.com/1/";
-    private static String createObjectUrl = baseUrl + "{object}/";
-    private static String deleteObjectUrl = baseUrl + "{object}/{id}";
-    private static String boardListsUrl = baseUrl + "boards/{id}/lists";
+    private final static String baseUrl = "https://api.trello.com/1/";
+    private final static String createObjectUrl = baseUrl + "{object}/";
+    private final static String deleteObjectUrl = baseUrl + "{object}/{id}";
+    private final static String boardListsUrl = baseUrl + "boards/{id}/lists";
 
     @Test
     public void testMethodGetBoards() throws IOException {
