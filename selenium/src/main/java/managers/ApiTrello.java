@@ -20,8 +20,8 @@ import kong.unirest.UnirestException;
 public class ApiTrello {
 
     private static String baseUrl = "https://api.trello.com/1/";
-    private static String deleteObjectUrl = baseUrl + "{object}/{id}";
     private static String createObjectUrl = baseUrl + "{object}/";
+    private static String deleteObjectUrl = baseUrl + "{object}/{id}";
     private static String boardListsUrl = baseUrl + "boards/{id}/lists";
 
     @Test

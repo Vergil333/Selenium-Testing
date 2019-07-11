@@ -12,8 +12,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import dtos.BoardDto;
@@ -24,15 +24,17 @@ public class TestNGTrello {
     private WebDriver driver;
     private WebDriverWait wait;
 
-    @BeforeTest
-    public void setup() {
+    @BeforeMethod
+    private void setup() {
         //driver = prepareFirefoxDriver();
         driver = prepareChromeDriver();
 
         wait = new WebDriverWait(driver, 7);
+
+        login();
     }
 
-    @AfterTest
+    @AfterMethod
     private void closeBrowser() {
         driver.close();
     }
@@ -46,7 +48,6 @@ public class TestNGTrello {
 
         managers.ApiTrello.deleteAllBoards("board").forEach(object -> Assert.assertEquals(object, expected));
 
-        login();
         checkBoardPage();
         createBoard(boardName);
     }
@@ -67,11 +68,9 @@ public class TestNGTrello {
         expected.put(200, "OK");
         managers.ApiTrello.archiveAllLists("lists", newBoard.getId()).forEach(object -> Assert.assertEquals(object, expected));
 
-        login();
         checkBoardPage();
         openBoard(boardName);
         archiveAllLists();
-        //archiveAllLists();
         createDemoList(listName);
     }
 
@@ -101,7 +100,6 @@ public class TestNGTrello {
         Assert.assertNotNull(newList, "List was not created.");
         Assert.assertEquals(newList.getName(), expectedListName, "Expected name of the list does not match.");
 
-        login();
         checkBoardPage();
         openBoard(boardName);
         closeBoardMenu();
@@ -110,12 +108,11 @@ public class TestNGTrello {
     }
 
     @Test(priority = 3)
-    public void createEverythingWithSelenium() throws IOException {
+    private void createEverythingWithSelenium() throws IOException {
         String boardName = "Board Everything with Selenium - Test 4";
         String listName = "Demo List";
         String cardName = "Demo Card";
 
-        login();
         checkBoardPage();
         createBoard(boardName); // board is opened automatically after creation
         closeBoardMenu();
@@ -163,12 +160,25 @@ public class TestNGTrello {
     }
 
     private void createBoard(String name) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul[@class=\"boards-page-board-section-list\"]/li/div/p/span[text()=\"Create new board\"]/../..")))
-                .click();
-        driver.findElement(By.xpath("//form[@class=\"create-board-form\"]/div[@class=\"form-container\"]/div[contains(@class,\"board-tile create-board-tile\")]/div/input[@class=\"subtle-input\"]"))
-                .sendKeys(name);
-        driver.findElement(By.xpath("//form[@class=\"create-board-form\"]/button[@class=\"primary\"]/span[text()=\"Create Board\"]"))
-                .click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
+                "//ul[@class=\"boards-page-board-section-list\"]" +
+                        "/li/div/p/span[text()=\"Create new board\"]" +
+                        "/.." +
+                        "/.."
+        ))).click();
+
+        driver.findElement(By.xpath(
+                "//form[@class=\"create-board-form\"]" +
+                        "/div[@class=\"form-container\"]" +
+                        "/div[contains(@class,\"board-tile create-board-tile\")]" +
+                        "/div/input[@class=\"subtle-input\"]"
+        )).sendKeys(name);
+
+        driver.findElement(By.xpath(
+                "//form[@class=\"create-board-form\"]" +
+                        "/button[@class=\"primary\"]" +
+                        "/span[text()=\"Create Board\"]"
+        )).click();
     }
 
     private void openBoard(String boardName) {
