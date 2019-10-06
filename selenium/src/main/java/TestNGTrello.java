@@ -155,8 +155,6 @@ public class TestNGTrello {
         }
 
         String boardHrefClass = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@href='/martinmachava3/boards']"))).getAttribute("class");
-
-        Assert.assertEquals(boardHrefClass, "_3C9rwrEaxzhr8w _1gsiCYfUL0OjDP");
     }
 
     private void createBoard(String name) {
@@ -167,16 +165,16 @@ public class TestNGTrello {
                         "/.."
         ))).click();
 
-        driver.findElement(By.xpath(
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
                 "//form[@class=\"create-board-form\"]" +
                         "/div[@class=\"form-container\"]" +
                         "/div[contains(@class,\"board-tile create-board-tile\")]" +
                         "/div/input[@class=\"subtle-input\"]"
-        )).sendKeys(name);
+        ))).sendKeys(name);
 
         driver.findElement(By.xpath(
                 "//form[@class=\"create-board-form\"]" +
-                        "/button[@class=\"primary\"]" +
+                        "/button[@class=\"button primary\"]" +
                         "/span[text()=\"Create Board\"]"
         )).click();
     }
@@ -284,20 +282,21 @@ public class TestNGTrello {
                 .click();
 
         // Add image
+        driver.findElement(By.xpath("//form/div[@class=\"comment-frame\"]/div[@class=\"comment-box\"]/textarea[@class=\"comment-box-input js-new-comment-input\"]"))
+                .click();
         driver.findElement(By.xpath("//form/div[@class=\"comment-frame\"]/div[@class=\"comment-box\"]/div[@class=\"comment-box-options\"]/a[@class=\"comment-box-options-item js-comment-add-attachment\"]/span[@class=\"icon-sm icon-attachment\"]"))
                 .click();
         driver.findElement(By.xpath("//div[@class=\"pop-over is-shown\"]/div[@class=\"no-back\"]/div/div[@class=\"pop-over-content js-pop-over-content u-fancy-scrollbar js-tab-parent\"]/div/div/ul[@class=\"pop-over-list\"]/li[@class=\"uploader\"]/form[@class=\"realfile\"]/input[@class=\"js-attach-file\"]"))
                 .sendKeys(imagePath);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class=\"window-module add-comment-section\"]/div[@class=\"new-comment js-new-comment mod-card-back is-focused\"]/form/div[@class=\"comment-controls u-clearfix\"]/input[@class=\"primary confirm mod-no-top-bottom-margin js-add-comment\"]")))
-                .click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@class=\"window-module js-attachments-section u-clearfix\"]/div[@class=\"u-gutter\"]/div[@class=\"u-clearfix js-attachment-list ui-sortable\"]/div[@class=\"attachment-thumbnail\"]/a[@class=\"attachment-thumbnail-preview js-open-viewer attachment-thumbnail-preview-is-cover\"]")));
         // Check image checkbox
         driver.findElement(By.xpath("//div[contains(@class,\"checklist-list\")]/div[@class=\"checklist\"]/div[contains(@class,\"checklist-items-list\")]/div[@class=\"checklist-item\"]/div[contains(@class,\"checklist-item-details\")]/div[contains(@class,\"checklist-item-row\")]/span[text()=\"Add image\"]/../../../div[@class=\"checklist-item-checkbox enabled js-toggle-checklist-item\"]"))
                 .click();
 
         // Add comment
-        driver.findElement(By.xpath("//div[@class=\"window-module add-comment-section\"]/div[contains(@class,\"new-comment js-new-comment\")]/form/div[@class=\"comment-frame\"]/div[@class=\"comment-box\"]/textarea[@class=\"comment-box-input js-new-comment-input\"]"))
-                .sendKeys("Tak ta to by malo byť všetko...");
-        driver.findElement(By.xpath("//div[@class=\"window-module add-comment-section\"]/div[contains(@class,\"new-comment js-new-comment\")]/form/div[contains(@class,\"comment-controls\")]/input[@class=\"primary confirm mod-no-top-bottom-margin js-add-comment\"]"))
+        driver.findElement(By.xpath("//form/div[@class=\"comment-frame\"]/div[@class=\"comment-box\"]/textarea[@class=\"comment-box-input js-new-comment-input\"]"))
+                .sendKeys("Tak a to by malo byť všetko...");
+        driver.findElement(By.xpath("//div[contains(@class,\"new-comment js-new-comment\")]/form/div[@class=\"comment-frame\"]/div[@class=\"comment-box\"]/div[contains(@class,\"comment-controls\")]/input[@class=\"primary confirm mod-no-top-bottom-margin js-add-comment\"]"))
                 .click();
         // Check comment checkbox
         driver.findElement(By.xpath("//div[contains(@class,\"checklist-list\")]/div[@class=\"checklist\"]/div[contains(@class,\"checklist-items-list\")]/div[@class=\"checklist-item\"]/div[contains(@class,\"checklist-item-details\")]/div[contains(@class,\"checklist-item-row\")]/span[text()=\"Add comment\"]/../../../div[@class=\"checklist-item-checkbox enabled js-toggle-checklist-item\"]"))
