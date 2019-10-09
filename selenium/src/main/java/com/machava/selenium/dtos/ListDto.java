@@ -1,4 +1,4 @@
-package dtos;
+package com.machava.selenium.dtos;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -15,8 +15,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BoardDto {
+public class ListDto {
     public String id;
     public String name;
-    public String url;
+    public Boolean closed;
 }

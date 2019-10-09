@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="0" total="4" passed="4" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2019-10-08T16:46:30Z" name="Default Suite" finished-at="2019-10-08T16:47:30Z" duration-ms="60142">
+    <groups>
+    </groups>
+    <test started-at="2019-10-08T16:46:30Z" name="Selenium-Testing" finished-at="2019-10-08T16:47:30Z" duration-ms="60142">
+      <class name="com.machava.selenium.TestNGTrello">
+        <test-method is-config="true" signature="setup()[pri:0, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:46:30Z" name="setup" finished-at="2019-10-08T16:46:34Z" duration-ms="4123" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setup -->
+        <test-method signature="createBoardWithSelenium()[pri:0, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:46:34Z" name="createBoardWithSelenium" finished-at="2019-10-08T16:46:39Z" duration-ms="4968" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- createBoardWithSelenium -->
+        <test-method is-config="true" signature="closeBrowser()[pri:0, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:46:39Z" name="closeBrowser" finished-at="2019-10-08T16:46:40Z" duration-ms="127" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- closeBrowser -->
+        <test-method is-config="true" signature="setup()[pri:0, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:46:40Z" name="setup" finished-at="2019-10-08T16:46:42Z" duration-ms="2236" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setup -->
+        <test-method signature="createBoardAndList()[pri:1, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:46:42Z" name="createBoardAndList" finished-at="2019-10-08T16:46:47Z" duration-ms="5566" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- createBoardAndList -->
+        <test-method is-config="true" signature="closeBrowser()[pri:0, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:46:47Z" name="closeBrowser" finished-at="2019-10-08T16:46:47Z" duration-ms="112" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- closeBrowser -->
+        <test-method is-config="true" signature="setup()[pri:0, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:46:47Z" name="setup" finished-at="2019-10-08T16:46:50Z" duration-ms="2328" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setup -->
+        <test-method signature="createEverything()[pri:2, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:46:50Z" name="createEverything" finished-at="2019-10-08T16:47:08Z" duration-ms="17826" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- createEverything -->
+        <test-method is-config="true" signature="closeBrowser()[pri:0, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:47:08Z" name="closeBrowser" finished-at="2019-10-08T16:47:08Z" duration-ms="111" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- closeBrowser -->
+        <test-method is-config="true" signature="setup()[pri:0, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:47:08Z" name="setup" finished-at="2019-10-08T16:47:10Z" duration-ms="2038" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setup -->
+        <test-method signature="createEverythingWithSelenium()[pri:3, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:47:10Z" name="createEverythingWithSelenium" finished-at="2019-10-08T16:47:30Z" duration-ms="20553" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- createEverythingWithSelenium -->
+        <test-method is-config="true" signature="closeBrowser()[pri:0, instance:com.machava.selenium.TestNGTrello@3911c2a7]" started-at="2019-10-08T16:47:30Z" name="closeBrowser" finished-at="2019-10-08T16:47:30Z" duration-ms="110" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- closeBrowser -->
+      </class> <!-- com.machava.selenium.TestNGTrello -->
+    </test> <!-- Selenium-Testing -->
+  </suite> <!-- Default Suite -->
+</testng-results>

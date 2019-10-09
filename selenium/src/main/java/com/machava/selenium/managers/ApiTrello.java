@@ -1,4 +1,4 @@
-package managers;
+package com.machava.selenium.managers;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,8 +11,8 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import dtos.BoardDto;
-import dtos.ListDto;
+import com.machava.selenium.dtos.BoardDto;
+import com.machava.selenium.dtos.ListDto;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
@@ -73,9 +73,6 @@ public class ApiTrello {
         assert response != null;
         List<BoardDto> boards = mapper.readValue(response.getBody(), new TypeReference<List<BoardDto>>() {});
 
-        System.out.println("response.getBody(): " + response.getBody());
-        boards.forEach((board) -> System.out.println("Board Name: " + board.getName()));
-
         return boards;
     }
 
@@ -96,9 +93,6 @@ public class ApiTrello {
         ObjectMapper mapper = new ObjectMapper();
         assert response != null;
         List<ListDto> lists = mapper.readValue(response.getBody(), new TypeReference<List<ListDto>>() {});
-
-        System.out.println("response.getBody(): " + response.getBody());
-        lists.forEach((list) -> System.out.println("Board Name: " + list.getName()));
 
         return lists;
     }
@@ -121,7 +115,6 @@ public class ApiTrello {
         assert response != null;
         BoardDto newBoard = mapper.readValue(response.getBody(), new TypeReference<BoardDto>() {});
 
-        System.out.println(newBoard);
         return newBoard;
     }
 
@@ -152,7 +145,6 @@ public class ApiTrello {
         assert response != null;
         ListDto newList = mapper.readValue(response.getBody(), new TypeReference<ListDto>() {});
 
-        System.out.println(newList);
         return newList;
     }
 

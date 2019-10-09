@@ -1,3 +1,5 @@
+package com.machava.selenium;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,8 +18,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import dtos.BoardDto;
-import dtos.ListDto;
+import com.machava.selenium.dtos.BoardDto;
+import com.machava.selenium.dtos.ListDto;
 
 public class TestNGTrello {
 
@@ -25,7 +27,7 @@ public class TestNGTrello {
     private WebDriverWait wait;
 
     @BeforeMethod
-    private void setup() {
+    public void setup() {
         //driver = prepareFirefoxDriver();
         driver = prepareChromeDriver();
 
@@ -35,38 +37,38 @@ public class TestNGTrello {
     }
 
     @AfterMethod
-    private void closeBrowser() {
+    public void closeBrowser() {
         driver.close();
     }
 
     @Test(priority = 0)
-    private void createBoardWithSelenium() throws IOException {
+    public void createBoardWithSelenium() throws IOException {
         String boardName = "Board - Test 1";
 
         HashMap<Integer, String> expected = new HashMap<Integer, String>();
         expected.put(200, "OK");
 
-        managers.ApiTrello.deleteAllBoards("board").forEach(object -> Assert.assertEquals(object, expected));
+        com.machava.selenium.managers.ApiTrello.deleteAllBoards("board").forEach(object -> Assert.assertEquals(object, expected));
 
         checkBoardPage();
         createBoard(boardName);
     }
 
     @Test(priority = 1)
-    private void createBoardAndList() throws IOException {
+    public void createBoardAndList() throws IOException {
         BoardDto newBoard;
         String boardName = "Board w/ List- Test 2";
         String expectedName = boardName;
         String listName = "Demo List";
 
-        newBoard = managers.ApiTrello.createBoard(boardName);
+        newBoard = com.machava.selenium.managers.ApiTrello.createBoard(boardName);
         Assert.assertNotNull(newBoard, "Board was not created.");
         Assert.assertEquals(newBoard.getName(), expectedName, "Expected name of the board does not match.");
 
         // Remove lists in newly created Board
         HashMap<Integer, String> expected = new HashMap<Integer, String>();
         expected.put(200, "OK");
-        managers.ApiTrello.archiveAllLists("lists", newBoard.getId()).forEach(object -> Assert.assertEquals(object, expected));
+        com.machava.selenium.managers.ApiTrello.archiveAllLists("lists", newBoard.getId()).forEach(object -> Assert.assertEquals(object, expected));
 
         checkBoardPage();
         openBoard(boardName);
@@ -75,7 +77,7 @@ public class TestNGTrello {
     }
 
     @Test(priority = 2)
-    private void createEverything() throws IOException {
+    public void createEverything() throws IOException {
         String boardName = "Board w/ List and Card- Test 3";
         String expectedBoardName = boardName;
         String listName = "Demo List";
@@ -84,7 +86,7 @@ public class TestNGTrello {
 
         // Create new board via API
         BoardDto newBoard;
-        newBoard = managers.ApiTrello.createBoard(boardName);
+        newBoard = com.machava.selenium.managers.ApiTrello.createBoard(boardName);
         Assert.assertNotNull(newBoard, "Board was not created.");
         Assert.assertEquals(newBoard.getName(), expectedBoardName, "Expected name of the board does not match.");
 
@@ -92,11 +94,11 @@ public class TestNGTrello {
         // Remove lists in newly created Board via API
         HashMap<Integer, String> expected = new HashMap<Integer, String>();
         expected.put(200, "OK");
-        managers.ApiTrello.archiveAllLists("lists", newBoard.getId()).forEach(object -> Assert.assertEquals(object, expected));
+        com.machava.selenium.managers.ApiTrello.archiveAllLists("lists", newBoard.getId()).forEach(object -> Assert.assertEquals(object, expected));
 
         // Create new list via API
         ListDto newList;
-        newList = managers.ApiTrello.createList(newBoard.getId(), listName);
+        newList = com.machava.selenium.managers.ApiTrello.createList(newBoard.getId(), listName);
         Assert.assertNotNull(newList, "List was not created.");
         Assert.assertEquals(newList.getName(), expectedListName, "Expected name of the list does not match.");
 
@@ -108,7 +110,7 @@ public class TestNGTrello {
     }
 
     @Test(priority = 3)
-    private void createEverythingWithSelenium() throws IOException {
+    public void createEverythingWithSelenium() throws IOException {
         String boardName = "Board Everything with Selenium - Test 4";
         String listName = "Demo List";
         String cardName = "Demo Card";

@@ -1,6 +1,5 @@
-package dtos;
+package com.machava.selenium.dtos;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
@@ -14,9 +13,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ListDto {
+public class CardDto {
     public String id;
+    public String idList;
     public String name;
-    public Boolean closed;
+    public String url;
 }
