@@ -1,57 +1,39 @@
 package com.machava.selenium;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.testng.annotations.Test;
+
 public class SendEmail {
 
     private final String sender = "trelloreport@testng.com";
-    private String recipient;
-    private String message;
+    private final String user = "mojtestovaciucet1@gmail.com";
+    private final String pass = "hesloPreOndra";
 
-    public SendEmail(String recipient, String message) {
-        this.recipient = recipient;
-        this.message = message;
-    }
-
-    public static void main(String [] args) {
-        String to = "abcd@gmail.com";
-
-        // Sender's email ID needs to be mentioned
-        String from = "web@gmail.com";
-
-        // Assuming you are sending email from localhost
+    public void send(String recipient, String emailableReport) {
         String host = "localhost";
 
-        // Get system properties
         Properties properties = System.getProperties();
-
-        // Setup mail server
         properties.setProperty("mail.smtp.host", host);
 
-        // Get the default Session object.
         Session session = Session.getDefaultInstance(properties);
 
         try {
-            // Create a default MimeMessage object.
             MimeMessage message = new MimeMessage(session);
 
-            // Set From: header field of the header.
             message.setFrom(new InternetAddress(sender));
-
-            // Set To: header field of the header.
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
-
-            // Set Subject: header field
-            message.setSubject("This is the Subject Line!");
-
-            // Now set the actual message
+            message.setSubject("Trello Tests from " + getActualDateTime());
             message.setText("This is actual message");
 
             // Send message
@@ -60,6 +42,58 @@ public class SendEmail {
         } catch (MessagingException mex) {
             mex.printStackTrace();
         }
+    }
+
+    public void send2(String recipient, String htmlReport) {
+
+        // Create a mail session
+        Properties properties = new Properties();
+        properties.put("mail.transport.protocol", "smtp");
+        properties.put("mail.smtp.host", "smtp.gmail.com");
+        properties.put("mail.smtp.port", "587");
+        properties.put("mail.smtp.auth", true);
+        properties.put("mail.smtp.starttls.enable", true);
+        properties.put("mail.smtp.username", user);
+        properties.put("mail.smtp.password", pass);
+        properties.put("mail.smtp.socketFactory.port", "465");
+        properties.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
+        properties.put("mail.smtp.socketFactory.fallback", "false");
+        //Session session = Session.getDefaultInstance(properties, null);
+        //get Session
+        Session session = Session.getDefaultInstance(properties, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(user,pass);
+            }
+        });
+
+        try
+        {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(sender));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
+
+            message.setSubject("Trello Tests from " + getActualDateTime());
+            message.setText("This is actual message");
+            Transport.send(message);
+
+            System.out.println("Email sent successfully");
+        }
+        catch (MessagingException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private String getActualDateTime() {
+        Date date = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ssZ");
+
+        return formatter.format(date);
+    }
+
+    @Test
+    public void testEmail() {
+        send2("Vergil333@gmail.com", "not important");
     }
 
 }
