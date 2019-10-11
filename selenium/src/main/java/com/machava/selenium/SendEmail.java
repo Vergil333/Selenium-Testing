@@ -14,8 +14,8 @@ import javax.mail.internet.MimeMessage;
 
 public class SendEmail {
 
-    private final String sender = "trelloreport@testng.com";
-    private final String user = "mojtestovaciucet1@gmail.com";
+    private final String sender = "mojtestovaciucet1@gmail.com";
+    private final String user = sender;
     private final String pass = "hesloPreOndra";
 
     public void send(String recipient, String htmlReport) {
