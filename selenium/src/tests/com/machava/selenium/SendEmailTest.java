@@ -1,7 +1,8 @@
 package com.machava.selenium;
 
 import org.junit.Test;
-import com.machava.selenium.SendEmail;
+
+import com.machava.selenium.managers.SendEmail;
 
 public class SendEmailTest {
 
@@ -9,6 +10,7 @@ public class SendEmailTest {
 
     @Test
     public void SendMail() {
-        sendEmail.send("machava.martin@sberbankcz.cz", "experimental message");
+        sendEmail.send("vergil333@gmail.com");
     }
+
 }

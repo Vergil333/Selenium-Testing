@@ -15,11 +15,13 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.machava.selenium.dtos.BoardDto;
 import com.machava.selenium.dtos.ListDto;
+import com.machava.selenium.managers.SendEmail;
 
 public class TestNGTrello {
 
@@ -306,5 +308,10 @@ public class TestNGTrello {
 
         // Wait till checkbox is checked
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(@class,\"checklist-list\")]/div[@class=\"checklist\"]/div[contains(@class,\"checklist-items-list\")]/div[@class=\"checklist-item checklist-item-state-complete\"]/div[contains(@class,\"checklist-item-details\")]/div[contains(@class,\"checklist-item-row\")]/span[text()=\"Add comment\"]/../../../div[@class=\"checklist-item-checkbox enabled js-toggle-checklist-item\"]")));
+    }
+
+    @AfterSuite
+    private void sendReportByEmail() throws InterruptedException { // TODO this is sending old report, not the new one
+        SendEmail.send("vergil333@gmail.com");
     }
 }

@@ -1,0 +1,10 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite verbose="1" name="Trello Suite" annotations="JDK">
+
+    <test name="TestTrello">
+        <classes>
+            <class name="com.machava.selenium.TestNGTrello"/>
+        </classes>
+    </test>
+</suite>
